@@ -1,7 +1,5 @@
 from datetime import datetime
-
-
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -37,7 +35,7 @@ class User(db.Model):
 
     def serialize(self):
         return {
-            "id": self.id,
+            'id': self.id,
             "username": self.username,
             "email": self.email,
             "role": self.role,
@@ -80,10 +78,32 @@ class Hello(Resource):
         return "hello world! from flask restful"
 
 
+class SignupResource(Resource):
+    def post(self):
+        data = request.get_json()
+        username = data['username']
+        email = data['email']
+        password = data['password']
+        
+        # Check if user already exists
+        if User.query.filter_by(username=username).first() or User.query.filter_by(email=email).first():
+            return jsonify({'message': 'Username or Email already exists'})
+
+        hashed_password = generate_password_hash(password)
+
+        new_user = User(username=username, email=email, password_hash=hashed_password)
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        return {username:username, email:email}
+            
+
 
 
 
 api.add_resource(Hello, '/hello')
+api.add_resource(SignupResource, '/signup')
 
 
 if __name__ == '__main__':
