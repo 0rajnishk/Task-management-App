@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, create_access_token
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_restful import Api, Resource
 
@@ -99,11 +99,25 @@ class SignupResource(Resource):
         return {username:username, email:email}
             
 
+class LoginResource(Resource):
+    def post(self):
+        data = request.get_json()
+        email = data['email']
+        password = data['password']
+
+        user = User.query.filter_by(email=email).first()
+
+        if user and check_password_hash(user.password_hash, password):
+            access_token = create_access_token(identity=user.username)
+            return jsonify({"msg":"successfully logged in", "token": access_token})
+
+        return jsonify({"msg": "email or password incorrect."})
 
 
 
 api.add_resource(Hello, '/hello')
 api.add_resource(SignupResource, '/signup')
+api.add_resource(LoginResource, '/login')
 
 
 if __name__ == '__main__':
