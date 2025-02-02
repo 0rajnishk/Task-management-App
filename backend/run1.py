@@ -1,11 +1,8 @@
 from datetime import datetime
-
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_restful import Api, Resource
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///project.db"
@@ -13,7 +10,7 @@ app.config["JWT_SECRET_KEY"] = "aStrongSecretKey"
 
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
-api = Api(app)
+
 
 
 ### 📌 USER TABLE (Authentication & Roles)
@@ -74,16 +71,9 @@ with app.app_context():
     db.create_all() 
 
 
-# Hello world resourse
-class Hello(Resource):
-    def get(self):
-        return "hello world! from flask restful"
-
-
-
-
-
-api.add_resource(Hello, '/hello')
+@app.route('/hello')
+def hello():
+    return "hello"
 
 
 if __name__ == '__main__':
