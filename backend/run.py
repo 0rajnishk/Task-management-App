@@ -1,12 +1,14 @@
 from datetime import datetime
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager, create_access_token
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_restful import Api, Resource
 from datetime import timedelta
 from flask_cors import cross_origin
+
+
 
 app = Flask(__name__)
 
@@ -82,8 +84,10 @@ with app.app_context():
 
 # Hello world resourse
 class Hello(Resource):
+    @cross_origin()
+    @jwt_required()
     def get(self):
-        return "hello world! from flask restful"
+        return jsonify({'msg': "hello world! from flask restful"})
 
 
 class SignupResource(Resource):
@@ -118,10 +122,12 @@ class LoginResource(Resource):
 
         if user and check_password_hash(user.password_hash, password):
             access_token = create_access_token(identity=user.username)
-            return jsonify({"msg":"successfully logged in", "token": access_token})
+            response = jsonify({"msg":"successfully logged in", "token": access_token})
+            print("\n"*4,access_token)
+            return make_response(response, 401)
 
-        return jsonify({"msg": "email or password incorrect."})
-
+        response = jsonify({"msg": "email or password incorrect."})
+        return make_response(response, 200)
 
 
 api.add_resource(Hello, '/hello')
