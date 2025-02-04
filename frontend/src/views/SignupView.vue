@@ -1,5 +1,5 @@
 <template>
-    <h2>signup page</h2>
+    <h2>Signup Page</h2>
 
     <form @submit.prevent="signup">
         <div>
@@ -16,60 +16,56 @@
         </div>
         <button type="submit">Sign Up</button>
     </form>
-
-
-
+ 
     <div>
-        <RouterLink to="/">home</RouterLink>
+        <RouterLink to="/">Home</RouterLink>
     </div>
-
     <div>
-        <RouterLink to="/signup">signup</RouterLink>
+        <RouterLink to="/signup">Signup</RouterLink>
     </div>
 </template>
 
 <script>
+import axios from 'axios'; 
+
 export default {
     data() {
         return {
-                username:"",
-                email:"",
-                password:"",
-        }
+            username: "",
+            email: "",
+            password: "",
+        };
     },
 
     methods: {
         async signup() {
-            alert("signup")
-            data = {
-                "username":this.username,
-                "email": this.email,
-                "password": this.password
+
+            if (!this.username || !this.email || !this.password) {
+                alert("All fields are required!");
+                return;
             }
+            
+            const data = {
+                username: this.username,
+                email: this.email,
+                password: this.password
+            };
+
             try {
-                const response = await fetch('http://127.0.0.1:5060/signup', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (!response.ok) {
-                    throw new Error('Sign Up failed!');
-                }
-
-                const responseData = await response.json();
-                alert(responseData.message);
-
-                this.$router.push('/login');
+                const response = await axios.post('http://localhost:5000/signup', data);
+                alert(response.data.message || 'Signup successful');
+                
             } catch (error) {
-                alert(error.message || 'singup failed!');
+                console.error("Signup Error:", error);
+
+
+                if (error.response) {
+                    alert(error.response.data.message || 'Signup failed');
+                } else {
+                    alert('Error during signup! Check your connection.');
+                }
             }
-
         }
-    },
-
+    }
 }
-
 </script>

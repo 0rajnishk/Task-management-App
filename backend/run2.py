@@ -6,10 +6,14 @@ from flask_jwt_extended import JWTManager, create_access_token
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_restful import Api, Resource
 from datetime import timedelta
-from flask_cors import cross_origin
 
 app = Flask(__name__)
 
+# Allow all origins and methods
+CORS(app, resources={r"/*": {"origins": "*"}},
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 app.config['CORS_HEADERS'] = 'Content-Type, Authorization'
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///project.db"
@@ -19,7 +23,6 @@ db = SQLAlchemy(app)
 jwt = JWTManager(app)
 api = Api(app)
 
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 
 ### 📌 USER TABLE (Authentication & Roles)
@@ -87,7 +90,6 @@ class Hello(Resource):
 
 
 class SignupResource(Resource):
-    @cross_origin()
     def post(self):
         data = request.get_json()
         username = data['username']
