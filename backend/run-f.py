@@ -69,6 +69,30 @@ class Task(db.Model):
 with app.app_context():
     db.create_all()
 
+
+def create_admin():
+    with app.app_context():
+        db.create_all()
+
+        # Check if admin user already exists
+        admin_user = User.query.filter_by(username='admin').first()
+        if not admin_user:
+            # Create admin user
+            admin = User(
+                username='admin',
+                email='admin@umail.com',
+                role='admin',
+                is_approved=True
+            )
+            admin.set_password('admin')  # Set password (you should hash it properly in production)
+
+            db.session.add(admin)
+            db.session.commit()
+
+            print("Default admin user created successfully.")
+        else:
+            print("Admin user already exists.")
+
 # ================================================= Helper Functions =========================================================
 
 def get_current_user():
@@ -208,4 +232,5 @@ api.add_resource(UserApprovalResource, '/users/pending', '/users/<int:user_id>/a
 api.add_resource(StatsResource, '/stats')
 
 if __name__ == '__main__':
+    create_admin()
     app.run(debug=True, port=5000, host="127.0.0.1")
